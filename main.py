@@ -47,7 +47,7 @@ def main():
     print(f'UserID: {userID}')
 
     courses = session.get(
-        'https://data.educoder.net/api/users/p8lb45t3h/courses.json'
+        f'https://data.educoder.net/api/users/{userID}/courses.json'
     ).json()
 
     for i, j in enumerate(courses['courses']):
