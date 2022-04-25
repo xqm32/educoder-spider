@@ -78,7 +78,9 @@ class EduCoder:
                 Columns(
                     [
                         i["homework_name"],
-                        maya.when(i["end_time"]).slang_time("zh"),
+                        maya.when(i["end_time"], timezone="Asia/Shanghai").slang_time(
+                            "zh"
+                        ),
                         i["end_time"],
                     ]
                 )
