@@ -138,4 +138,5 @@ class EduCoder:
 
 
 if __name__ == "__main__":
-    EduCoder().homework()
+    coder = EduCoder()
+    coder.homework()
