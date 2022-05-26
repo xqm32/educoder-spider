@@ -10,6 +10,8 @@ from rich.logging import RichHandler
 from rich.progress import Progress
 from rich.prompt import Prompt
 from rich.traceback import install
+from rich.table import Table
+from rich import box
 
 install()
 
@@ -73,18 +75,17 @@ class EduCoder:
                 works.append(homework)
 
         works.sort(key=lambda x: maya.when(x["end_time"]))
+        table = Table(show_header=False, box=box.SIMPLE)
+        table.add_column()
+        table.add_column()
+        table.add_column()
         for i in works:
-            print(
-                Columns(
-                    [
-                        i["homework_name"],
-                        maya.when(i["end_time"], timezone="Asia/Shanghai").slang_time(
-                            "zh"
-                        ),
-                        i["end_time"],
-                    ]
-                )
+            table.add_row(
+                maya.when(i["end_time"]).datetime().strftime("%Y-%m-%d %H:%M"),
+                i["homework_name"],
+                maya.when(i["end_time"], timezone="Asia/Shanghai").slang_time("zh"),
             )
+        print(table)
 
     def select(self):
         courses = self.client.get(
