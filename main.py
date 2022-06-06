@@ -1,3 +1,4 @@
+from itertools import count
 import json
 import logging
 import os
@@ -5,7 +6,6 @@ import os
 import httpx
 import maya
 from rich import print
-from rich.columns import Columns
 from rich.logging import RichHandler
 from rich.progress import Progress
 from rich.prompt import Prompt
@@ -55,24 +55,33 @@ class EduCoder:
         courseURL = course["first_category_url"]
         courseID = courseURL.split("/")[2]
 
-        homeworkCommons = self.client.get(
-            "https://data.educoder.net/api/courses/f8nczpt6/homework_commons.json",
-            params={"course_id": courseID, "type": 1},
-        ).json()
-
         works = []
-        for i in homeworkCommons["homeworks"]:
-            if i["un_commit_work"]:
-                payload = {
-                    "coursesId": courseID,
-                    "categoryId": i["homework_id"],
-                    "id": courseID,
-                }
-                homework = self.client.get(
-                    f"https://data.educoder.net/api/homework_commons/{i['homework_id']}/settings.json",
-                    params=payload,
-                ).json()
-                works.append(homework)
+
+        for i in count(1):
+            homeworkCommons = self.client.get(
+                "https://data.educoder.net/api/courses/f8nczpt6/homework_commons.json",
+                params={"course_id": courseID, "type": 1, "page": i},
+            ).json()
+
+            if not homeworkCommons["homeworks"]:
+                break
+                
+            print(f"正在加载第 {i} 页")
+
+            for j in homeworkCommons["homeworks"]:
+                if j["un_commit_work"]:
+                    payload = {
+                        "coursesId": courseID,
+                        "categoryId": j["homework_id"],
+                        "id": courseID,
+                    }
+                    homework = self.client.get(
+                        f"https://data.educoder.net/api/homework_commons/{j['homework_id']}/settings.json",
+                        params=payload,
+                    ).json()
+                    works.append(homework)
+            
+            print(f"第 {i} 页加载完成，已获取 {len(works)} 个任务")
 
         works.sort(key=lambda x: maya.when(x["end_time"]))
         table = Table(show_header=False, box=box.SIMPLE)
@@ -97,13 +106,13 @@ class EduCoder:
 
         which = int(
             Prompt.ask(
-                "Which course?",
+                "选择课程: ",
                 choices=[str(i) for i in range(len(courses["courses"]))],
                 default=0,
             )
         )
         course = courses["courses"][which]
-        print(f'Selected course: {course["name"]}')
+        print(f'选择了: {course["name"]}')
         return course
 
     def attachment(self):
