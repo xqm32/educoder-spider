@@ -65,7 +65,7 @@ class EduCoder:
 
             if not homeworkCommons["homeworks"]:
                 break
-                
+
             print(f"正在加载第 {i} 页")
 
             for j in homeworkCommons["homeworks"]:
@@ -80,7 +80,7 @@ class EduCoder:
                         params=payload,
                     ).json()
                     works.append(homework)
-            
+
             print(f"第 {i} 页加载完成，已获取 {len(works)} 个任务")
 
         works.sort(key=lambda x: maya.when(x["end_time"]))
@@ -90,7 +90,9 @@ class EduCoder:
         table.add_column()
         for i in works:
             table.add_row(
-                maya.when(i["end_time"]).datetime().strftime("%Y-%m-%d %H:%M"),
+                maya.when(i["end_time"], timezone="Asia/Shanghai")
+                .datetime(to_timezone="Asia/Shanghai")
+                .strftime("%Y-%m-%d %H:%M"),
                 i["homework_name"],
                 maya.when(i["end_time"], timezone="Asia/Shanghai").slang_time("zh"),
             )
