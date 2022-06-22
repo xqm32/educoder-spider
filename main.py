@@ -123,8 +123,11 @@ class EduCoder:
         courseID = courseURL.split("/")[2]
 
         files = self.client.get(
-            "https://data.educoder.net/api/files.json", params={"course_id": courseID}
+            "https://data.educoder.net/api/files.json",
+            params={"course_id": courseID, "clazz": "1"},
         ).json()
+
+        print(f"共有 {len(files['data']['files'])} 个文件")
 
         with Progress() as progress:
             if not os.path.exists(f"Downloads/{course['name']}"):
@@ -136,10 +139,10 @@ class EduCoder:
 
             for i, j in enumerate(files["data"]["files"]):
                 progress.console.print(
-                    f'Downloading [green]{j["title"]}[/green] {j["url"]}'
+                    f'Downloading [green]{j["title"]}[/green] {j["url"]} to Downloads/{course["name"]}/{j["title"]}'
                 )
-                if os.path.exists(f'{course["name"]}/{j["title"]}'):
-                    print(f'{j["title"]} already existed')
+                if os.path.exists(f'Downloads/{course["name"]}/{j["title"]}'):
+                    progress.console.print(f'{j["title"]} already existed')
                     progress.update(task, advance=1)
                     continue
                 file = self.client.get(f'https://data.educoder.net{j["url"]}').content
@@ -151,4 +154,4 @@ class EduCoder:
 
 if __name__ == "__main__":
     coder = EduCoder()
-    coder.homework()
+    coder.attachment()
